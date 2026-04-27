@@ -57,6 +57,19 @@ class Authenticator {
             : generateSecureRandomString(64)
     }
 
+    getTokenVersion(): string {
+        return this.tokenVersion
+    }
+
+    // Used at startup to restore the persisted tokenVersion from the data
+    // store, so that issued JWTs survive a CapRover restart.
+    setTokenVersion(tokenVersion: string) {
+        if (!tokenVersion) {
+            throw new Error('tokenVersion cannot be empty')
+        }
+        this.tokenVersion = tokenVersion
+    }
+
     changepass(oldPass: string, newPass: string, savedHashedPassword: string) {
         const self = this
 

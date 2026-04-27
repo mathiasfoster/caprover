@@ -119,6 +119,14 @@ router.post('/changepassword/', function (req, res, next) {
             return dataStore.setHashedPassword(hashedPassword)
         })
         .then(function () {
+            // changepass rotates the in-memory tokenVersion to invalidate
+            // existing sessions. Persist the new version so the rotation
+            // survives a CapRover restart.
+            return dataStore.setTokenVersion(
+                Authenticator.getAuthenticator(namespace).getTokenVersion()
+            )
+        })
+        .then(function () {
             res.send(new BaseApi(ApiStatusCodes.STATUS_OK, 'Password changed.'))
         })
         .catch(ApiStatusCodes.createCatcher(res))
