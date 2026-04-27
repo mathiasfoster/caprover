@@ -96,7 +96,17 @@ router.post('/', function (req, res, next) {
             )
         })
         .then(function (cookieAuth) {
-            res.cookie(CaptainConstants.headerCookieAuth, cookieAuth)
+            const isHttps =
+                req.secure || req.get('X-Forwarded-Proto') === 'https'
+            res.cookie(CaptainConstants.headerCookieAuth, cookieAuth, {
+                httpOnly: true,
+                secure: isHttps,
+                sameSite: 'lax',
+                // Match the JWT TTL (480h in Authenticator.getAuthToken) so the
+                // cookie does not silently outlive the token it carries.
+                maxAge: 480 * 60 * 60 * 1000,
+                path: '/',
+            })
             const baseApi = new BaseApi(
                 ApiStatusCodes.STATUS_OK,
                 'Login succeeded'
