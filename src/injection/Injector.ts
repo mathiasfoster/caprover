@@ -57,8 +57,22 @@ export function injectUser() {
 
         const namespace = res.locals.namespace
 
-        Authenticator.getAuthenticator(namespace)
-            .decodeAuthToken(req.header(CaptainConstants.headerAuth) || '')
+        // Prefer the explicit auth header; fall back to the cookie set by
+        // /login so that opening the UI in a new tab does not force a fresh
+        // sign-in. Header tokens and cookie tokens are signed with different
+        // suffixes, so each must use its matching decoder.
+        const headerToken = req.header(CaptainConstants.headerAuth) || ''
+        const cookieToken = headerToken
+            ? ''
+            : (req.cookies && req.cookies[CaptainConstants.headerCookieAuth]) ||
+              ''
+
+        const authenticator = Authenticator.getAuthenticator(namespace)
+        const decodePromise = headerToken
+            ? authenticator.decodeAuthToken(headerToken)
+            : authenticator.decodeAuthTokenFromCookies(cookieToken)
+
+        decodePromise
             .then(function (userDecoded) {
                 if (userDecoded) {
                     const datastore = DataStoreProvider.getDataStore(namespace)
