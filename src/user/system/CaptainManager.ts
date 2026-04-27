@@ -217,6 +217,26 @@ class CaptainManager {
                 return dataStore.setEncryptionSalt(self.getCaptainSalt())
             })
             .then(function () {
+                // Hydrate the Authenticator's tokenVersion from disk so that
+                // existing sessions survive a CapRover restart. If no version
+                // has been persisted yet (fresh install), persist whatever the
+                // Authenticator generated in its constructor.
+                const authenticator = Authenticator.getAuthenticator(
+                    dataStore.getNameSpace()
+                )
+                return dataStore
+                    .getTokenVersion()
+                    .then(function (persistedVersion) {
+                        if (persistedVersion) {
+                            authenticator.setTokenVersion(persistedVersion)
+                            return undefined
+                        }
+                        return dataStore.setTokenVersion(
+                            authenticator.getTokenVersion()
+                        )
+                    })
+            })
+            .then(function () {
                 return loadBalancerManager.init(myNodeId, dataStore)
             })
             .then(function () {

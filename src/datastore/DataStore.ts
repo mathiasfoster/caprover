@@ -21,6 +21,7 @@ import RegistriesDataStore from './RegistriesDataStore'
 // keys:
 const NAMESPACE = 'namespace'
 const HASHED_PASSWORD = 'hashedPassword'
+const TOKEN_VERSION = 'tokenVersion'
 const CUSTOM_DOMAIN = 'customDomain'
 const HAS_ROOT_SSL = 'hasRootSsl'
 const FORCE_ROOT_SSL = 'forceRootSsl'
@@ -170,6 +171,20 @@ class DataStore {
         const self = this
         return Promise.resolve().then(function () {
             return self.data.get(HASHED_PASSWORD)
+        })
+    }
+
+    setTokenVersion(tokenVersion: string) {
+        const self = this
+        return Promise.resolve().then(function () {
+            return self.data.set(TOKEN_VERSION, tokenVersion)
+        })
+    }
+
+    getTokenVersion(): Promise<string | undefined> {
+        const self = this
+        return Promise.resolve().then(function () {
+            return self.data.get(TOKEN_VERSION)
         })
     }
 
